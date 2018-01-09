@@ -14,14 +14,17 @@ def extract(data, gameNum):
 # ie. a list of a list of a list.
 # Each index of the return value of getGames() corresponds to a specific chess game.
 # Each game is a list of matrices (list of lists) that cooresponds to sequential moves in the game.
-# the jsonFile and the start index and preinitialized, so unless alternate file or start position required,
-# leave as is. Only required input is end, which is the number of games requested.
-def getGames(end, start = 0, jsonFile = "jsonFiles/jsonTest.json"):
+# The start index is preinitialized, so unless alternate start position required,
+# leave as is. Only required input is number of games (end) and jsonFile, which is the number of games requested and the
+# jsonFile containing desired games.
+def getGames(end, jsonFile, start = 0):
 	data = load(jsonFile)
-	games = [None]*end
+	games = []
 	for i in range(start,end):
 		game = extract(data,i)
-    	games[i] = game
+		#print( len(games) )
+		games.append(game)
 	return games
 
-result = getGames(2)
+#test = getGames(4,'/Users/Mike/Documents/MyCode/jsonFiles/jsonTest.json')
+#print len(test)

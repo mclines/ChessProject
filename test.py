@@ -1,4 +1,3 @@
-import chess
 from getInfo import *
 
 def example():

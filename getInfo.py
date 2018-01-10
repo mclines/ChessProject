@@ -52,6 +52,3 @@ def getGames(end, jsonFile, start = 0):
 		numGame = makeArray(game)
 		games.append(numGame)
 	return numpy.array(games)
-
-games = getGames(2, '/Users/Mike/Documents/MyCode/jsonFiles/jsonTest.json')
-print type(games), type(games[0]),type(games[0][0]), type(games[0][0][0]), type(games[0][0][0][0])

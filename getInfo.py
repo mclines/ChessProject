@@ -11,6 +11,16 @@ def extract(data, gameNum):
     game = data["GAME"+str(gameNum)]
     return game
 
+#changeSize(game) is the resulting game of size 250 states to provide equal length games.
+#changeSize : game -> game
+def changeSize(game):
+	desiredSize = 250
+	lastMove = game[-1]
+	newGame = [lastMove]*desiredSize
+	for index,move in enumerate(game):
+		newGame[index] = move
+	return newGame
+
 # makeArray: list(list(list(int))) -> array(array(array(int)))
 def makeArray(game):
     #matrices are 64x64 numpy arrays
@@ -38,6 +48,10 @@ def getGames(end, jsonFile, start = 0):
 	games = []
 	for i in range(start,end):
 		game = extract(data,i)
+		game = changeSize(game)
 		numGame = makeArray(game)
 		games.append(numGame)
-	return games
+	return numpy.array(games)
+
+games = getGames(2, '/Users/Mike/Documents/MyCode/jsonFiles/jsonTest.json')
+print type(games), type(games[0]),type(games[0][0]), type(games[0][0][0]), type(games[0][0][0][0])

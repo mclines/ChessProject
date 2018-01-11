@@ -1,6 +1,9 @@
 import numpy
 import json
 
+#length of the standard chess game in the dataset
+GAMELENGTH = 250
+
 #used to load the JSON file
 def load(fileName):
 	data = json.load(open(fileName,'r'))
@@ -14,9 +17,8 @@ def extract(data, gameNum):
 #changeSize(game) is the resulting game of size 250 states to provide equal length games.
 #changeSize : game -> game
 def changeSize(game):
-	desiredSize = 250
 	lastMove = game[-1]
-	newGame = [lastMove]*desiredSize
+	newGame = [lastMove]*GAMELENGTH
 	for index,move in enumerate(game):
 		newGame[index] = move
 	return newGame

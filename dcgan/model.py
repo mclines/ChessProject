@@ -25,10 +25,10 @@ def dataset_files(root):
 
 
 class DCGAN(object):
-    def __init__(self, sess, image_size=64, is_crop=False,
-                 batch_size=64, sample_size=64, lowres=8,
-                 z_dim=100, gf_dim=64, df_dim=64,
-                 gfc_dim=1024, dfc_dim=1024, c_dim=3,
+    def __init__(self, sess, image_size=128, is_crop=False,
+                 batch_size=128, sample_size=128, lowres=8,
+                 z_dim=100, gf_dim=128, df_dim=128,
+                 gfc_dim=1024, dfc_dim=1024, c_dim=1,
                  checkpoint_dir=None, lam=0.1):
         """
 
@@ -98,7 +98,7 @@ class DCGAN(object):
              self.lowres_size, self.lowres, self.c_dim]), [2, 4])
         self.D, self.D_logits = self.discriminator(self.images)
 
-        print ("self.D , self.D_logits = ", self.D, self.D_logits )
+        #print ("self.D , self.D_logits = ", self.D, self.D_logits )
 
         self.D_, self.D_logits_ = self.discriminator(self.G, reuse=True)
 
@@ -109,8 +109,8 @@ class DCGAN(object):
         self.d_loss_real = tf.reduce_mean(
             tf.nn.sigmoid_cross_entropy_with_logits(logits=self.D_logits,
                                                     labels=tf.ones_like(self.D)))
-        print("d_loss_real type: ", type(self.d_loss_real))
-        print("d_loss_real = ", self.d_loss_real)
+        #print("d_loss_real type: ", type(self.d_loss_real))
+        #print("d_loss_real = ", self.d_loss_real)
 
 
         self.d_loss_fake = tf.reduce_mean(
@@ -120,8 +120,8 @@ class DCGAN(object):
             tf.nn.sigmoid_cross_entropy_with_logits(logits=self.D_logits_,
                                                     labels=tf.ones_like(self.D_)))
 
-        print("g_loss type: ", type(self.g_loss))
-        print("g_loss = ", self.g_loss)
+        #print("g_loss type: ", type(self.g_loss))
+        #print("g_loss = ", self.g_loss)
 
 
         self.d_loss_real_sum = tf.summary.scalar("d_loss_real", self.d_loss_real)
@@ -159,12 +159,12 @@ class DCGAN(object):
 
         d_optim = tf.train.AdamOptimizer(config.learning_rate, beta1=config.beta1) \
                           .minimize(self.d_loss, var_list=self.d_vars)
-        print("TYPE OF 'd_optim'",type(d_optim))
-        print("'d_optim' = ", d_optim)
+        #print("TYPE OF 'd_optim'",type(d_optim))
+        #print("'d_optim' = ", d_optim)
         g_optim = tf.train.AdamOptimizer(config.learning_rate, beta1=config.beta1) \
                           .minimize(self.g_loss, var_list=self.g_vars)
-        print("TYPE OF 'g_optim'",type(g_optim))
-        print("'g_optim' = ", g_optim)
+        #print("TYPE OF 'g_optim'",type(g_optim))
+        #print("'g_optim' = ", g_optim)
         try:
             tf.global_variables_initializer().run()
         except:
@@ -316,7 +316,7 @@ Initializing a new one.
                      for batch_file in batch_files]
             batch_images = np.array(batch).astype(np.float32)
             if batchSz < self.batch_size:
-                print(batchSz)
+                #print(batchSz)
                 padSz = ((0, int(self.batch_size-batchSz)), (0,0), (0,0), (0,0))
                 batch_images = np.pad(batch_images, padSz, 'constant')
                 batch_images = batch_images.astype(np.float32)
@@ -418,7 +418,7 @@ Initializing a new one.
                     assert(False)
 
     def discriminator(self, image, reuse=False):
-        print("DESICRIMINATOR CALLED")
+        #print("DESICRIMINATOR CALLED")
         with tf.variable_scope("discriminator") as scope:
             if reuse:
                 scope.reuse_variables()
@@ -433,7 +433,7 @@ Initializing a new one.
             return tf.nn.sigmoid(h4), h4
 
     def generator(self, z):
-        print("GENERATOR CALLED")
+        #print("GENERATOR CALLED")
         with tf.variable_scope("generator") as scope:
             self.z_, self.h0_w, self.h0_b = linear(z, self.gf_dim*8*4*4, 'g_h0_lin', with_w=True)
 
@@ -460,7 +460,7 @@ Initializing a new one.
             hs.append(None)
             name = 'g_h{}'.format(i)
             hs[i], _, _ = conv2d_transpose(hs[i - 1],
-                [self.batch_size, size, size, 3], name=name, with_w=True)
+                [self.batch_size, size, size, self.c_dim], name=name, with_w=True)
 
             return tf.nn.tanh(hs[i])
 

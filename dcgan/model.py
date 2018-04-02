@@ -174,7 +174,7 @@ class DCGAN(object):
             [self.z_sum, self.d__sum, self.G_sum, self.d_loss_fake_sum, self.g_loss_sum])
         self.d_sum = tf.summary.merge(
             [self.z_sum, self.d_sum, self.d_loss_real_sum, self.d_loss_sum])
-        self.writer = tf.summary.FileWriter("/Users/Mike/ChessProject/dcgan/logs", self.sess.graph)
+        self.writer = tf.summary.FileWriter("./logs", self.sess.graph)
 
         sample_z = np.random.uniform(-1, 1, size=(self.sample_size , self.z_dim))
         sample_files = data[0:self.sample_size]
@@ -250,7 +250,7 @@ Initializing a new one.
                         feed_dict={self.z: sample_z, self.images: sample_images, self.is_training: False}
                     )
                     save_images(samples, [8, 8],
-                                '/Users/Mike/ChessProject/dcgan/samples/train_{:02d}_{:04d}.png'.format(epoch, idx))
+                                './samples/train_{:02d}_{:04d}.png'.format(epoch, idx))
                     print("[Sample] d_loss: {:.8f}, g_loss: {:.8f}".format(d_loss, g_loss))
 
                 if np.mod(counter, 500) == 2:

@@ -403,38 +403,18 @@ Initializing a new one.
                 else:
                     assert(False)
 
-    # def discriminator(self, image, reuse=False):
-    #     #print("DESICRIMINATOR CALLED")
-    #     with tf.variable_scope("discriminator") as scope:
-    #         if reuse:
-    #             scope.reuse_variables()
-    #
-    #         # TODO: Investigate how to parameterise discriminator based off image size.
-    #         h0 = lrelu(conv2d(image, self.df_dim, name='d_h0_conv'))
-    #         h1 = lrelu(self.d_bns[0](conv2d(h0, self.df_dim*2, name='d_h1_conv'), self.is_training))
-    #         h2 = lrelu(self.d_bns[1](conv2d(h1, self.df_dim*4, name='d_h2_conv'), self.is_training))
-    #         h3 = lrelu(self.d_bns[2](conv2d(h2, self.df_dim*8, name='d_h3_conv'), self.is_training))
-    #         h4 = linear(tf.reshape(h3, [-1, 8192]), 1, 'd_h4_lin')
-    #         print('h0:',h0)
-    #         print('h1:',h1)
-    #         print('h2:',h2)
-    #         print('h3:',h3)
-    #         print('h4:',h4)
-    #         print('tf.nn.sigmoid(h4): ',tf.nn.sigmoid(h4))
-    #         return tf.nn.sigmoid(h4), h4
     def discriminator(self, image, reuse=False):
+        #print("DESICRIMINATOR CALLED")
         with tf.variable_scope("discriminator") as scope:
             if reuse:
                 scope.reuse_variables()
-            h0 = lrelu(conv2d(image, self.df_dim, k_h = 64,k_w = 64,d_h =32, d_w =32, name='d_h0_conv'))
-            h1 = lrelu(self.d_bns[0](conv2d(h0, self.df_dim*2, k_h = 32, k_w = 32, d_h = 16, d_w = 16,name='d_h1_conv'), self.is_training))
-            h2 = lrelu(self.d_bns[1](conv2d(h1, self.df_dim*4, k_h = 16, k_w = 16, d_h = 8, d_w = 8, name='d_h2_conv'), self.is_training))
-            h3 = lrelu(self.d_bns[2](conv2d(h2, self.df_dim*8, k_h = 8, k_w = 8, d_h = 4, d_w =4, name='d_h3_conv'), self.is_training))
-            h4 = lrelu(self.d_bns[3](conv2d(h3, self.df_dim*16, k_h = 4, k_w = 4, d_h = 1, d_w = 1, name='d_h4_conv'), self.is_training))
-            h5 = lrelu(self.d_bns[4](conv2d(h4, self.df_dim*32, k_h = 2, k_w = 2, d_h = 1, d_w = 1, name='d_h5_conv'), self.is_training))
-            h6 = linear(tf.reshape(h5, [-1,8192]), 1, 'd_h6_lin')
-            return tf.nn.sigmoid(h6),h6
-
+            # TODO: Investigate how to parameterise discriminator based off image size.
+            h0 = lrelu(conv2d(image, self.df_dim, name='d_h0_conv'))
+            h1 = lrelu(self.d_bns[0](conv2d(h0, self.df_dim*2, name='d_h1_conv'), self.is_training))
+            h2 = lrelu(self.d_bns[1](conv2d(h1, self.df_dim*4, name='d_h2_conv'), self.is_training))
+            h3 = lrelu(self.d_bns[2](conv2d(h2, self.df_dim*8, name='d_h3_conv'), self.is_training))
+            h4 = linear(tf.reshape(h3, [-1, 8192]), 1, 'd_h4_lin')
+            return tf.nn.sigmoid(h4), h4
 
     def generator(self, z):
         with tf.variable_scope("generator") as scope:

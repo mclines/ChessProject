@@ -48,7 +48,7 @@ def conv_cond_concat(x, y):
     return tf.concat(3, [x, y*tf.ones([x_shapes[0], x_shapes[1], x_shapes[2], y_shapes[3]])])
 
 def conv2d(input_, output_dim,
-           k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02,
+           k_h=8, k_w=8, d_h=2, d_w=2, stddev=0.02,
            name="conv2d"):
     with tf.variable_scope(name):
         # filter (kernel): [height, width, output_channels, in_channels]
@@ -63,7 +63,7 @@ def conv2d(input_, output_dim,
         return conv
 
 def conv2d_transpose(input_, output_shape,
-                     k_h=5, k_w=5, d_h=2, d_w=2, stddev=0.02,
+                     k_h=8, k_w=8, d_h=2, d_w=2, stddev=0.02,
                      name="conv2d_transpose", with_w=False):
     with tf.variable_scope(name):
         # filter : [height, width, output_channels, in_channels]

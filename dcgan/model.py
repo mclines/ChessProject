@@ -172,7 +172,6 @@ class DCGAN(object):
 
         counter = 1
         start_time = time.time()
-
         if self.load(self.checkpoint_dir):
             print("""
 
@@ -228,6 +227,7 @@ Initializing a new one.
                 errG = self.g_loss.eval({self.z: batch_z, self.is_training: False})
 
                 counter += 1
+
                 print("Epoch: [{:2d}] [{:4d}/{:4d}] time: {:4.4f}, d_loss: {:.8f}, g_loss: {:.8f}".format(
                     epoch, idx, batch_idxs, time.time() - start_time, errD_fake+errD_real, errG))
 

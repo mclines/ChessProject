@@ -16,11 +16,11 @@ from utils import pp, visualize, to_json
 import tensorflow as tf
 
 flags = tf.app.flags
-flags.DEFINE_integer("epoch", 25, "Epoch to train [25]")
+flags.DEFINE_integer("epoch", 2, "Epoch to train [25]")
 flags.DEFINE_float("learning_rate", 0.001, "Learning rate of for adam [0.0001]")
 flags.DEFINE_float("beta1", 0.9, "Momentum term of adam [0.9]")
-flags.DEFINE_integer("train_size", 102057, "The size of train images [5000]")
-flags.DEFINE_integer("batch_size", 64, "The size of batch images [64]")
+flags.DEFINE_integer("train_size", 10, "The size of train images [102057]")
+flags.DEFINE_integer("batch_size", 10, "The size of batch images [64]")
 flags.DEFINE_integer("image_size", 128, "The size of image to use")
 flags.DEFINE_string("dataset", "training_images", "Dataset directory.")
 flags.DEFINE_string("checkpoint_dir", "checkpoint", "Directory name to save the checkpoints [checkpoint]")

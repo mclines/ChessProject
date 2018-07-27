@@ -18,14 +18,17 @@ pp = pprint.PrettyPrinter()
 
 get_stddev = lambda x, k_h, k_w: 1/math.sqrt(k_w*k_h*x.get_shape()[-1])
 
-def get_image(image_path, image_size, is_crop=False):
-    return transform(imread(image_path), image_size, is_crop)
+def get_image(image_path, image_size, is_crop=False, is_array = False):
+    return transform(imread(image_path, is_array), image_size, is_crop)
 
 def save_images(images, size, image_path):
     return imsave(inverse_transform(images), size, image_path)
 
-def imread(path):
-    image_input = scipy.misc.imread(path, mode='L')
+def imread(path,is_array):
+    if is_array:
+        image_input = path
+    else:
+        image_input = scipy.misc.imread(path, mode='L')
     image = []
     for i in range(len(image_input)):
         row = []
@@ -54,7 +57,6 @@ def imsave(images, size, path):
     return scipy.misc.imsave(path, (255*img).astype(np.uint8))
 
 def center_crop(x, crop_h, crop_w=None, resize_w=64):
-    print("CENTER_CROP WAS CALLED")
     if crop_w is None:
         crop_w = crop_h
     h, w = x.shape[:2]

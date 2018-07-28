@@ -12,7 +12,7 @@ import itertools
 from glob import glob
 import tensorflow as tf
 from six.moves import xrange
-
+import numpy as np
 from ops import *
 from utils import *
 
@@ -402,6 +402,79 @@ Initializing a new one.
 
                 else:
                     assert(False)
+    def play(self,config,image,move_num):
+        def make_dir(name):
+            # Works on python 2.7, where exist_ok arg to makedirs isn't available.
+            p = os.path.join(config.outDir, name)
+            if not os.path.exists(p):
+                os.makedirs(p)
+        make_dir('hats_imgs')
+        make_dir('completed')
+        make_dir('logs')
+
+        #set up
+        try:
+            tf.global_variables_initializer().run()
+        except:
+            tf.initialize_all_variables().run()
+
+        isLoaded = self.load(self.checkpoint_dir)
+        assert(isLoaded)
+
+        #load image
+        batchSz = 1
+        batch_images = [get_image(image, self.image_size, is_crop=self.is_crop, is_array = True)]
+        batch_images = np.array(batch_images).astype(np.float32)
+
+        mask = np.zeros(self.image_shape)
+        lowres_mask = np.zeros(self.lowres_shape)
+        masked_images = np.multiply(batch_images, mask)
+        zhats = np.random.uniform(-1, 1, size=(self.batch_size, self.z_dim))
+        m = 0
+        v = 0
+        for i in xrange(config.nIter):
+            fd = {
+                self.z: zhats,
+                self.mask: mask,
+                self.lowres_mask: lowres_mask,
+                self.images: batch_images,
+                self.is_training: False
+            }
+            run = [self.complete_loss, self.grad_complete_loss, self.G, self.lowres_G]
+            loss, g, G_imgs, lowres_G_imgs = self.sess.run(run, feed_dict=fd)
+
+            for img in range(batchSz):
+                with open(os.path.join(config.outDir, 'logs/hats_{:02d}.log'.format(img)), 'ab') as f:
+                    f.write('{} {} '.format(i, loss[img]).encode())
+                    np.savetxt(f, zhats[img:img+1])
+
+            if i % config.outInterval == 0:
+                print(i, np.mean(loss[0:batchSz]))
+                # imgName = os.path.join(config.outDir,
+                #                        'hats_imgs/{:04d}.png'.format(i))
+                # #nRows = np.ceil(batchSz/8)
+                # #nCols = min(8, batchSz)
+                # #save_images(G_imgs[:batchSz,:,:,:], [nRows,nCols], imgName)
+                # inv_masked_hat_images = np.multiply(G_imgs, 1.0-mask)
+                # completed = masked_images + inv_masked_hat_images
+                # imgName = os.path.join(config.outDir,
+                #                        'completed/{:04d}.png'.format(i))
+                # save_images(completed[:batchSz,:,:,:], [nRows,nCols], imgName)
+
+            if config.approach == 'adam':
+                # Optimize single completion with Adam
+                m_prev = np.copy(m)
+                v_prev = np.copy(v)
+                m = config.beta1 * m_prev + (1 - config.beta1) * g[0]
+                v = config.beta2 * v_prev + (1 - config.beta2) * np.multiply(g[0], g[0])
+                m_hat = m / (1 - config.beta1 ** (i + 1))
+                v_hat = v / (1 - config.beta2 ** (i + 1))
+                zhats += - np.true_divide(config.lr * m_hat, (np.sqrt(v_hat) + config.eps))
+                zhats = np.clip(zhats, -1, 1)
+            else:
+                assert(False)
+        predicted_board = self.remove_board(G_imgs[0],move_num)
+        return predicted_board
 
     def discriminator(self, image, reuse=False):
         #print("DESICRIMINATOR CALLED")
@@ -464,3 +537,22 @@ Initializing a new one.
             return True
         else:
             return False
+
+    def remove_board(self, image, move_num):
+        #If the row_num is even, then left to right.
+        #right to left if quotient is odd
+        row_num = move_num // 16
+        #empty 2d array to store values for specific game board.
+        board = np.array([[0]*8 for i in range(8)]).astype('uint8')
+        if row_num % 2 == 0:
+            x1 = (move_num % 16)  * 8
+            x2 = x1 + 8
+        else:
+            x2 = 128 - ((move_num % 16) * 8)
+            x1 = x2 - 8
+        y1 = row_num*8
+        y2 = y1 + 8
+        for x in range(x1,x2):
+            for y in range(y1,y2):
+                board[y%8][x%8] = image[y][x]
+        return board

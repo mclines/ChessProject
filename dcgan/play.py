@@ -16,7 +16,6 @@ import chess
 from model import DCGAN
 import operator
 import numpy as np
-from PIL import Image
 
 MATRIXLENGTH = 16
 BOARDLENGTH = 9

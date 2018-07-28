@@ -71,7 +71,7 @@ class DCGAN(object):
 
         # batch normalization : deals with poor initialization helps gradient flow
         self.d_bns = [
-            batch_norm(name='d_bn{}'.format(i,)) for i in range(4)]
+            batch_norm(name='d_bn{}'.format(i,)) for i in range(6)]
 
         log_size = int(math.log(image_size) / math.log(2))
         self.g_bns = [
@@ -97,9 +97,6 @@ class DCGAN(object):
             [self.batch_size, self.lowres_size, self.lowres,
              self.lowres_size, self.lowres, self.c_dim]), [2, 4])
         self.D, self.D_logits = self.discriminator(self.images)
-
-        #print ("self.D , self.D_logits = ", self.D, self.D_logits )
-
         self.D_, self.D_logits_ = self.discriminator(self.G, reuse=True)
 
         self.d_sum = tf.summary.histogram("d", self.D)
@@ -109,20 +106,12 @@ class DCGAN(object):
         self.d_loss_real = tf.reduce_mean(
             tf.nn.sigmoid_cross_entropy_with_logits(logits=self.D_logits,
                                                     labels=tf.ones_like(self.D)))
-        #print("d_loss_real type: ", type(self.d_loss_real))
-        #print("d_loss_real = ", self.d_loss_real)
-
-
         self.d_loss_fake = tf.reduce_mean(
             tf.nn.sigmoid_cross_entropy_with_logits(logits=self.D_logits_,
                                                     labels=tf.zeros_like(self.D_)))
         self.g_loss = tf.reduce_mean(
             tf.nn.sigmoid_cross_entropy_with_logits(logits=self.D_logits_,
                                                     labels=tf.ones_like(self.D_)))
-
-        #print("g_loss type: ", type(self.g_loss))
-        #print("g_loss = ", self.g_loss)
-
 
         self.d_loss_real_sum = tf.summary.scalar("d_loss_real", self.d_loss_real)
         self.d_loss_fake_sum = tf.summary.scalar("d_loss_fake", self.d_loss_fake)
@@ -154,17 +143,16 @@ class DCGAN(object):
 
     def train(self, config):
         data = dataset_files(config.dataset)
+        print("config.dataset = ",config.dataset)
         np.random.shuffle(data)
         assert(len(data) > 0)
 
         d_optim = tf.train.AdamOptimizer(config.learning_rate, beta1=config.beta1) \
                           .minimize(self.d_loss, var_list=self.d_vars)
-        #print("TYPE OF 'd_optim'",type(d_optim))
-        #print("'d_optim' = ", d_optim)
+
         g_optim = tf.train.AdamOptimizer(config.learning_rate, beta1=config.beta1) \
                           .minimize(self.g_loss, var_list=self.g_vars)
-        #print("TYPE OF 'g_optim'",type(g_optim))
-        #print("'g_optim' = ", g_optim)
+
         try:
             tf.global_variables_initializer().run()
         except:
@@ -184,7 +172,6 @@ class DCGAN(object):
 
         counter = 1
         start_time = time.time()
-
         if self.load(self.checkpoint_dir):
             print("""
 
@@ -240,6 +227,7 @@ Initializing a new one.
                 errG = self.g_loss.eval({self.z: batch_z, self.is_training: False})
 
                 counter += 1
+
                 print("Epoch: [{:2d}] [{:4d}/{:4d}] time: {:4.4f}, d_loss: {:.8f}, g_loss: {:.8f}".format(
                     epoch, idx, batch_idxs, time.time() - start_time, errD_fake+errD_real, errG))
 
@@ -295,7 +283,7 @@ Initializing a new one.
             c = self.image_size // 2
             mask[:,:c,:] = 0.0
         elif config.maskType == 'full':
-            mask = np.ones(self.image_shape)
+            mask = np.zeros(self.image_shape)
         elif config.maskType == 'grid':
             mask = np.zeros(self.image_shape)
             mask[::4,::4,:] = 1.0
@@ -493,18 +481,15 @@ Initializing a new one.
         with tf.variable_scope("discriminator") as scope:
             if reuse:
                 scope.reuse_variables()
-
             # TODO: Investigate how to parameterise discriminator based off image size.
             h0 = lrelu(conv2d(image, self.df_dim, name='d_h0_conv'))
             h1 = lrelu(self.d_bns[0](conv2d(h0, self.df_dim*2, name='d_h1_conv'), self.is_training))
             h2 = lrelu(self.d_bns[1](conv2d(h1, self.df_dim*4, name='d_h2_conv'), self.is_training))
             h3 = lrelu(self.d_bns[2](conv2d(h2, self.df_dim*8, name='d_h3_conv'), self.is_training))
             h4 = linear(tf.reshape(h3, [-1, 8192]), 1, 'd_h4_lin')
-
             return tf.nn.sigmoid(h4), h4
 
     def generator(self, z):
-        #print("GENERATOR CALLED")
         with tf.variable_scope("generator") as scope:
             self.z_, self.h0_w, self.h0_b = linear(z, self.gf_dim*8*4*4, 'g_h0_lin', with_w=True)
 
